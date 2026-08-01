@@ -1,6 +1,5 @@
 import {
   X,
-  ShieldAlert,
   Calendar,
   Database,
   Bot,
