@@ -3,13 +3,39 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.auth import router as auth_router
+from app.api.v1.assets import router as assets_router
+from app.api.v1.scans import router as scans_router
+from app.api.v1.verification import router as verification_router
+
 from app.core.config import settings
-from app.api.v1 import auth
+from app.db.init_db import init_db
+from app.api.v1.reports import router as reports_router
+print("✅ reports_router imported")
+from app.api.v1.history import router as history_router
+
+from app.scheduler.worker import (
+    start_scheduler,
+    scheduler,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create database tables
+    await init_db()
+
+    # Start background scheduler
+    start_scheduler()
+
+    print("✅ Background Scheduler Started")
+
     yield
+
+    # Stop scheduler gracefully
+    if scheduler.running:
+        scheduler.shutdown()
+        print("🛑 Background Scheduler Stopped")
 
 
 app = FastAPI(
@@ -20,17 +46,28 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176",
+        "http://localhost:5177",
+        "http://localhost:5178",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-API = "/api/v1"
+API_PREFIX = "/api/v1"
 
-# Only register routes that currently exist
-app.include_router(auth.router, prefix=API)
-
+app.include_router(auth_router, prefix=API_PREFIX)
+app.include_router(assets_router, prefix=API_PREFIX)
+app.include_router(scans_router, prefix=API_PREFIX)
+app.include_router(verification_router, prefix=API_PREFIX)
+app.include_router(reports_router, prefix=API_PREFIX)
+app.include_router(history_router, prefix=API_PREFIX)
+print("✅ Reports & History routers included")
 
 @app.get("/")
 async def root():

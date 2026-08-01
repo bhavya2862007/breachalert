@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import get_current_user
 from app.core.security import (
     hash_password,
     verify_password,
@@ -13,7 +14,10 @@ from app.models.user import User
 from app.schemas.auth import UserCreate, TokenResponse
 from app.schemas.user import UserOut
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(
+    prefix="/auth",
+    tags=["Authentication"],
+)
 
 
 @router.post("/register", response_model=UserOut)
@@ -23,7 +27,7 @@ async def register(
 ):
     existing = (
         await db.execute(
-            select(User).where(User.email == body.email)
+            select(User).where(User.email == body.email.lower())
         )
     ).scalar_one_or_none()
 
@@ -43,7 +47,12 @@ async def register(
     await db.commit()
     await db.refresh(user)
 
-    return user
+    return UserOut(
+        id=str(user.id),
+        email=user.email,
+        full_name=user.full_name,
+        plan=user.plan.value,
+    )
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -59,7 +68,7 @@ async def login(
         )
     ).scalar_one_or_none()
 
-    if not user:
+    if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials.",
@@ -77,4 +86,16 @@ async def login(
     return TokenResponse(
         access_token=create_token(str(user.id), "access"),
         refresh_token=create_token(str(user.id), "refresh"),
+    )
+
+
+@router.get("/me", response_model=UserOut)
+async def get_me(
+    current_user: User = Depends(get_current_user),
+):
+    return UserOut(
+        id=str(current_user.id),
+        email=current_user.email,
+        full_name=current_user.full_name,
+        plan=current_user.plan.value,
     )

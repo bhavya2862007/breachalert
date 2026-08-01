@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, JSON, String, func
+from sqlalchemy import DateTime, ForeignKey, Integer, JSON, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -11,25 +11,41 @@ class BreachFinding(Base):
     __tablename__ = "breach_findings"
 
     id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
         primary_key=True,
         default=uuid.uuid4,
     )
 
     asset_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("monitored_assets.id", ondelete="CASCADE")
+        Uuid,
+        ForeignKey("monitored_assets.id", ondelete="CASCADE"),
+        nullable=False,
     )
 
-    breach_name: Mapped[str] = mapped_column(String(255))
-    breach_title: Mapped[str] = mapped_column(String(255))
+    breach_name: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+
+    breach_title: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
 
     breach_date: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True,
     )
 
-    pwn_count: Mapped[int] = mapped_column(Integer, default=0)
+    pwn_count: Mapped[int] = mapped_column(
+        Integer,
+        default=0,
+    )
 
-    data_classes: Mapped[list] = mapped_column(JSON)
+    data_classes: Mapped[list] = mapped_column(
+        JSON,
+        default=list,
+    )
 
     description: Mapped[str | None] = mapped_column(
         String,

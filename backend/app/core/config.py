@@ -1,9 +1,13 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="ignore",
+    )
 
     # App
     APP_NAME: str = "BreachAlert"
@@ -17,18 +21,20 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
 
     # Database
-    DATABASE_URL: str          # postgresql+asyncpg://...
-    REDIS_URL: str = "redis://redis:6379/0"
+    DATABASE_URL: str
+    REDIS_URL: str = "redis://localhost:6379/0"
 
     # HIBP
     HIBP_API_KEY: str
     HIBP_BASE_URL: str = "https://haveibeenpwned.com/api/v3"
-    HIBP_RATE_LIMIT_MS: int = 1600     # min gap between requests
-    HIBP_CACHE_TTL: int = 86400        # 24h caching
+    HIBP_USER_AGENT: str = "BreachAlert/1.0"
+    HIBP_RATE_LIMIT_MS: int = 1600
+    HIBP_CACHE_TTL: int = 86400
 
     # Notifications
     SENDGRID_API_KEY: str = ""
     FROM_EMAIL: str = "alerts@breachalert.io"
+
     TWILIO_SID: str = ""
     TWILIO_TOKEN: str = ""
     TWILIO_FROM: str = ""
@@ -38,7 +44,7 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: str = ""
     STRIPE_PRICE_FAMILY: str = ""
 
-    # Encryption (for at-rest email encryption)
+    # Encryption
     FERNET_KEY: str
 
 

@@ -19,3 +19,8 @@ class AssetOut(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+
+class AssetCreateResponse(BaseModel):
+    asset: AssetOut
+    verification_url: str
