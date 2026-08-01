@@ -1,18 +1,22 @@
-import api from "./client";
+import client from "./client";
 
 export const AssetAPI = {
   list() {
-    return api.get("/assets");
+    return client.get("/assets");
   },
 
   create(email: string, label: string) {
-    return api.post("/assets", {
+    return client.post("/assets", {
       email,
       label,
     });
   },
 
   delete(id: string) {
-    return api.delete(`/assets/${id}`);
+    return client.delete(`/assets/${id}`);
+  },
+
+  verify(token: string) {
+    return client.get(`/verify/${token}`);
   },
 };

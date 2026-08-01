@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { X, Mail, Tag } from "lucide-react";
-import { toast } from "react-hot-toast/headless";
 import toast from "react-hot-toast";
 
 interface Props {
