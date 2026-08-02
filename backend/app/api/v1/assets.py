@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.deps import get_current_user
+from app.core.config import settings
 from app.core.security import (
     encrypt_email,
     decrypt_email,
@@ -21,6 +22,10 @@ from app.schemas.asset import (
     AssetOut,
     AssetCreateResponse,
 )
+from app.services.email import (
+    send_email,
+    verification_email_html,
+)
 
 router = APIRouter(
     prefix="/assets",
@@ -29,13 +34,6 @@ router = APIRouter(
 
 
 def mask_email(email: str) -> str:
-    """
-    Example:
-    bhavya@gmail.com
-    ->
-    b*****a@gmail.com
-    """
-
     local, domain = email.split("@")
 
     if len(local) <= 2:
@@ -94,16 +92,18 @@ async def create_asset(
     )
 
     db.add(asset)
-
     await db.commit()
     await db.refresh(asset)
 
-    print("\n" + "=" * 60)
-    print("📧 EMAIL VERIFICATION LINK")
-    print(
-        f"http://127.0.0.1:8000/api/v1/verify/{token}"
+    # Verification link
+    verify_link = f"{settings.FRONTEND_URL}/verify/{token}"
+
+    # Send verification email
+    await send_email(
+        to=body.email,
+        subject="Verify your BreachAlert email",
+        html=verification_email_html(verify_link),
     )
-    print("=" * 60 + "\n")
 
     return AssetCreateResponse(
         asset=AssetOut(
@@ -114,7 +114,7 @@ async def create_asset(
             last_scanned_at=asset.last_scanned_at,
             breach_count=0,
         ),
-        verification_url=f"http://localhost:5173/verify/{token}",
+        verification_url=verify_link,
     )
 
 
