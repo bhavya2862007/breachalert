@@ -22,7 +22,7 @@ from app.schemas.asset import (
     AssetOut,
     AssetCreateResponse,
 )
-from app.services.email import (
+from app.services.notifier import (
     send_email,
     verification_email_html,
 )
