@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { AssetAPI } from "../api/assets";
 
-export default function VerifyAsset() {
+export default function VerifyEmail() {
+  const { token } = useParams();
   const [msg, setMsg] = useState("Verifying...");
 
   useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get("token");
-
     if (!token) {
-      setMsg("Missing token.");
+      setMsg("Missing verification token.");
       return;
     }
 
@@ -23,7 +23,7 @@ export default function VerifyAsset() {
               "Verification failed.")
         );
       });
-  }, []);
+  }, [token]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
