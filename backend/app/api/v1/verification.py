@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -34,7 +34,7 @@ async def verify_email(
 
     if (
         asset.verification_expires_at
-        and asset.verification_expires_at < datetime.now()
+        and asset.verification_expires_at < datetime.now(timezone.utc)
     ):
         raise HTTPException(
             status_code=400,
