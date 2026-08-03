@@ -30,7 +30,6 @@ class MonitoredAsset(Base):
 
     email_hash: Mapped[str] = mapped_column(
         String(64),
-        unique=True,
         index=True,
         nullable=False,
     )
