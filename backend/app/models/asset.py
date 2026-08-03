@@ -1,14 +1,29 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    String,
+    Uuid,
+    func,
+    UniqueConstraint,
+)
 
 
 class MonitoredAsset(Base):
     __tablename__ = "monitored_assets"
+    __table_args__ = (
+    UniqueConstraint(
+        "user_id",
+        "email_hash",
+        name="uq_user_email",
+    ),
+)
 
     id: Mapped[uuid.UUID] = mapped_column(
         Uuid,
